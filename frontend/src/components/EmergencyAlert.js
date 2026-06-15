@@ -25,6 +25,7 @@ const EmergencyAlert = ({ contacts }) => {
     return () => {
       window.removeEventListener('triggerEmergencyAlert', handleTriggerAlert);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location, contacts]);
 
   // Auto-get location (called on mount)
@@ -87,7 +88,7 @@ const EmergencyAlert = ({ contacts }) => {
               location: { latitude, longitude },
               contacts: response.contactsNotified,
               timestamp: new Date(),
-              smsResults: response.smsResults
+              pushResults: response.pushResults
             });
 
             setMessage(
@@ -138,6 +139,17 @@ const EmergencyAlert = ({ contacts }) => {
           <span className="text-3xl">📍</span>
           Location Tracking (Auto)
         </h2>
+
+        <div className="mb-6">
+          <button
+            id="test-trigger"
+            disabled={alertSending}
+            onClick={() => window.dispatchEvent(new Event('triggerEmergencyAlert'))}
+            className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg shadow transition-all transform hover:scale-102 active:scale-98 text-md flex items-center justify-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
+          >
+            {alertSending ? '🚨 Sending Emergency Alert...' : '🚨 Trigger Emergency Alert (Test Hook)'}
+          </button>
+        </div>
 
         {locationMessage && (
           <div className={`mb-6 p-4 rounded-lg font-semibold text-lg ${
@@ -226,12 +238,12 @@ const EmergencyAlert = ({ contacts }) => {
             <p className="text-green-700">⏰ Time: {lastAlert.timestamp.toLocaleTimeString()}</p>
             <p className="text-green-700">📍 Location: {lastAlert.location.latitude.toFixed(4)}, {lastAlert.location.longitude.toFixed(4)}</p>
             
-            {lastAlert.smsResults && lastAlert.smsResults.length > 0 && (
-              <div className="mt-4 p-3 bg-white rounded border border-green-300">
-                <p className="font-bold text-green-800 mb-2">📱 SMS Status:</p>
-                {lastAlert.smsResults.map((result, idx) => (
-                  <p key={idx} className={`text-sm ${result.status.includes('sent') || result.status.includes('demo') ? 'text-green-700' : 'text-red-700'}`}>
-                    {result.status.includes('sent') || result.status.includes('demo') ? '✅' : '❌'} {result.contact} ({result.phone}): {result.status}
+            {lastAlert.pushResults && lastAlert.pushResults.length > 0 && (
+              <div className="mt-4 p-3 bg-white rounded border border-purple-300">
+                <p className="font-bold text-purple-800 mb-2">🔔 Push Notification Status:</p>
+                {lastAlert.pushResults.map((result, idx) => (
+                  <p key={idx} className={`text-sm ${result.status === 'delivered' ? 'text-purple-700' : 'text-red-700'}`}>
+                    {result.status === 'delivered' ? '✅' : '❌'} {result.contact} ({result.phone}): {result.status}
                   </p>
                 ))}
               </div>

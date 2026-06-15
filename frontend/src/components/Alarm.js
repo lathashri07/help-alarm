@@ -40,7 +40,6 @@ document.addEventListener('touchstart', unlockAudio, { once: true });
 const Alarm = forwardRef((props, ref) => {
   const [isAlarmPlaying, setIsAlarmPlaying] = useState(false);
   const [audioUnlocked, setAudioUnlocked]   = useState(false);
-  const [debugLog, setDebugLog]             = useState([]);
 
   const oscillatorRef = useRef(null);
   const gainNodeRef   = useRef(null);
@@ -48,7 +47,6 @@ const Alarm = forwardRef((props, ref) => {
   const log = (msg) => {
     const ts = new Date().toLocaleTimeString();
     console.log(`[Alarm ${ts}] ${msg}`);
-    setDebugLog(prev => [`[${ts}] ${msg}`, ...prev].slice(0, 10));
   };
 
   // Poll the global unlock state so the UI badge updates

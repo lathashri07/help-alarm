@@ -65,3 +65,50 @@ export const getAlerts = async () => {
     throw error;
   }
 };
+
+export const getVapidPublicKey = async () => {
+  try {
+    const response = await apiClient.get('/vapid-public-key');
+    return response.data.publicKey;
+  } catch (error) {
+    console.error('Error fetching VAPID public key:', error);
+    throw error;
+  }
+};
+
+export const subscribeContact = async (contactId, subscription) => {
+  try {
+    const response = await apiClient.post('/subscribe', {
+      contactId,
+      subscription,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error subscribing contact:', error);
+    throw error;
+  }
+};
+
+export const unsubscribeContact = async (subscription) => {
+  try {
+    const response = await apiClient.post('/unsubscribe', {
+      subscription,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error unsubscribing contact:', error);
+    throw error;
+  }
+};
+
+export const checkSubscription = async (subscription) => {
+  try {
+    const response = await apiClient.post('/check-subscription', {
+      subscription,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error checking subscription:', error);
+    throw error;
+  }
+};

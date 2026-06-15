@@ -6,7 +6,6 @@ const VoiceRecognition = () => {
   const [confidence, setConfidence] = useState(0);
   const [lastHeard, setLastHeard]   = useState('');
   const [feedback, setFeedback]     = useState('👆 Click anywhere on the page to activate');
-  const [debugLog, setDebugLog]     = useState([]);
   const [micError, setMicError]     = useState('');
 
   const alarmRef        = useRef(null);
@@ -19,7 +18,6 @@ const VoiceRecognition = () => {
   const log = useCallback((msg) => {
     const ts = new Date().toLocaleTimeString();
     console.log(`[Voice ${ts}] ${msg}`);
-    setDebugLog(prev => [`[${ts}] ${msg}`, ...prev].slice(0, 16));
   }, []);
 
   // ── HELP scorer: checks if transcript contains "help" ─────────────────────

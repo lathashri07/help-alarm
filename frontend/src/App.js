@@ -1,12 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import VoiceRecognition from './components/VoiceRecognition';
 import ContactManager from './components/ContactManager';
 import EmergencyAlert from './components/EmergencyAlert';
 import AlertHistory from './components/AlertHistory';
+import { getContacts } from './services/api';
 
 function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [contacts, setContacts] = useState([]);
+
+  useEffect(() => {
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => {
+          console.log('Service Worker registered successfully on startup with scope:', reg.scope);
+        })
+        .catch(err => {
+          console.warn('Service Worker registration on startup failed:', err);
+        });
+    }
+    loadContacts();
+  }, []);
+
+  const loadContacts = async () => {
+    try {
+      const data = await getContacts();
+      setContacts(data);
+    } catch (error) {
+      console.error('Failed to load initial contacts:', error);
+    }
+  };
 
   const handleContactsUpdate = (updatedContacts) => {
     setContacts(updatedContacts);
