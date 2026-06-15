@@ -9,7 +9,24 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Real SMS using Azure has been deprecated and removed. All alerts are sent via Push Notifications.
+const twilio = require('twilio');
+
+// Twilio Setup
+let twilioClient = null;
+const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
+const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
+const TWILIO_FROM_NUMBER = process.env.TWILIO_FROM_NUMBER || '+1234567890'; // Placeholder
+
+if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN) {
+  try {
+    twilioClient = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+    console.log('Twilio SMS Client initialized successfully');
+  } catch (e) {
+    console.error('Failed to initialize Twilio client:', e.message);
+  }
+} else {
+  console.log('Twilio SMS not configured - running SMS in demo mode');
+}
 
 // Middleware
 app.use(cors());
@@ -215,8 +232,60 @@ app.post('/api/emergency-alert', async (req, res) => {
           return res.status(500).json({ error: 'Failed to fetch contacts' });
         }
 
-        // Prepare emergency message with location
-        const mapsLink = `https://maps.google.com/?q=${latitude},${longitude}`;
+        // Prepare emergency message with location (shortened to 1 segment to prevent Twilio Trial Error 30044)
+        const mapsLink = `https://maps.google.com/?q=${latitude.toFixed(6)},${longitude.toFixed(6)}`;
+        const smsMessage = `EMERGENCY ALERT: Your loved one is in danger! Lat: ${latitude.toFixed(4)}, Lng: ${longitude.toFixed(4)}. View: ${mapsLink}`;
+
+        // Send SMS to all contacts (if Twilio is configured)
+        let smsSendResults = [];
+        if (contacts.length > 0) {
+          if (twilioClient) {
+            for (const contact of contacts) {
+              try {
+                let phoneNumber = contact.phone_number.replace(/[^\d+]/g, '');
+                // Ensure it starts with + for Twilio
+                if (!phoneNumber.startsWith('+')) {
+                  phoneNumber = '+' + phoneNumber;
+                }
+                
+                const messageObj = await twilioClient.messages.create({
+                  body: smsMessage,
+                  from: TWILIO_FROM_NUMBER,
+                  to: phoneNumber
+                });
+
+                smsSendResults.push({
+                  contact: contact.contact_name,
+                  phone: contact.phone_number,
+                  status: 'sent',
+                  messageId: messageObj.sid
+                });
+                console.log(`Twilio SMS sent to ${contact.contact_name} at ${contact.phone_number}`);
+              } catch (smsErr) {
+                console.error(`Failed to send Twilio SMS to ${contact.phone_number}:`, smsErr.message);
+                smsSendResults.push({
+                  contact: contact.contact_name,
+                  phone: contact.phone_number,
+                  status: 'failed',
+                  error: smsErr.message
+                });
+              }
+            }
+          } else {
+            // Demo mode - simulate SMS sending
+            console.log('📱 DEMO MODE - SMS would be sent to:');
+            smsSendResults = contacts.map(contact => ({
+              contact: contact.contact_name,
+              phone: contact.phone_number,
+              status: 'demo-sent',
+              message: 'Demo mode - Twilio not configured'
+            }));
+            contacts.forEach(contact => {
+              console.log(`  📞 ${contact.contact_name}: ${contact.phone_number}`);
+            });
+            console.log(`  📝 Message: ${smsMessage}`);
+          }
+        }
 
         // --- Push Notifications Logic ---
         let pushSendResults = [];
@@ -289,6 +358,7 @@ app.post('/api/emergency-alert', async (req, res) => {
               message: message || 'Emergency Alert!',
               contactsNotified: contacts.length,
               contacts: contacts,
+              smsResults: smsSendResults,
               pushResults: pushSendResults,
               mapsLink: mapsLink,
               timestamp: new Date().toISOString()

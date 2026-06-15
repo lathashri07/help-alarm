@@ -1,0 +1,9 @@
+{
+  "name": "send-sms-cloud-function",
+  "version": "1.0.0",
+  "description": "Google Cloud Function to securely send SMS alerts using Twilio",
+  "main": "index.js",
+  "dependencies": {
+    "twilio": "^4.19.0"
+  }
+}

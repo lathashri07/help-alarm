@@ -88,6 +88,7 @@ const EmergencyAlert = ({ contacts }) => {
               location: { latitude, longitude },
               contacts: response.contactsNotified,
               timestamp: new Date(),
+              smsResults: response.smsResults,
               pushResults: response.pushResults
             });
 
@@ -238,6 +239,17 @@ const EmergencyAlert = ({ contacts }) => {
             <p className="text-green-700">⏰ Time: {lastAlert.timestamp.toLocaleTimeString()}</p>
             <p className="text-green-700">📍 Location: {lastAlert.location.latitude.toFixed(4)}, {lastAlert.location.longitude.toFixed(4)}</p>
             
+            {lastAlert.smsResults && lastAlert.smsResults.length > 0 && (
+              <div className="mt-4 p-3 bg-white rounded border border-green-300">
+                <p className="font-bold text-green-800 mb-2">📱 SMS Status:</p>
+                {lastAlert.smsResults.map((result, idx) => (
+                  <p key={idx} className={`text-sm ${result.status === 'sent' || result.status.includes('demo') ? 'text-green-700' : 'text-red-700'}`}>
+                    {result.status === 'sent' || result.status.includes('demo') ? '✅' : '❌'} {result.contact} ({result.phone}): {result.status}
+                  </p>
+                ))}
+              </div>
+            )}
+
             {lastAlert.pushResults && lastAlert.pushResults.length > 0 && (
               <div className="mt-4 p-3 bg-white rounded border border-purple-300">
                 <p className="font-bold text-purple-800 mb-2">🔔 Push Notification Status:</p>
