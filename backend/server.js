@@ -34,7 +34,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Database Setup
-const dbPath = path.join(__dirname, 'help_alarm.db');
+const dbPath = process.env.DATABASE_PATH || path.join(__dirname, 'help_alarm.db');
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
     console.error('Database connection error:', err);
