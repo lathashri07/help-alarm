@@ -176,27 +176,27 @@ const ContactManager = ({ onContactsUpdate }) => {
   return (
     <div className="space-y-8">
       {/* Add Contact Form */}
-      <div className="bg-white rounded-lg shadow-lg p-8 border-l-4 border-blue-600">
-        <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-          <span className="text-3xl">➕</span>
+      <div className="bg-slate-900/60 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl p-8 hover:border-cyan-500/20 transition-all duration-300">
+        <h2 className="text-2xl md:text-3xl font-extrabold text-slate-100 mb-6 flex items-center gap-2">
+          <span className="text-2xl md:text-3xl">➕</span>
           Add Emergency Contact
         </h2>
 
         {message && (
-          <div className={`mb-6 p-4 rounded-lg font-semibold text-lg ${
+          <div className={`mb-6 p-4 rounded-xl font-semibold text-sm md:text-base border ${
             message.includes('✅')
-              ? 'bg-green-100 text-green-800 border-2 border-green-500'
+              ? 'bg-emerald-950/40 text-emerald-300 border-emerald-500/35'
               : message.includes('❌')
-              ? 'bg-red-100 text-red-800 border-2 border-red-500'
-              : 'bg-yellow-100 text-yellow-800 border-2 border-yellow-500'
+              ? 'bg-rose-950/40 text-rose-300 border-rose-500/35'
+              : 'bg-amber-950/40 text-amber-300 border-amber-500/35'
           }`}>
             {message}
           </div>
         )}
 
-        <form onSubmit={handleAddContact} className="space-y-4">
+        <form onSubmit={handleAddContact} className="space-y-5">
           <div>
-            <label className="block text-gray-700 font-semibold mb-2">
+            <label className="block text-slate-300 font-semibold mb-2 text-sm md:text-base">
               📞 Phone Number (Required)
             </label>
             <input
@@ -204,12 +204,12 @@ const ContactManager = ({ onContactsUpdate }) => {
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
               placeholder="+1 (555) 123-4567"
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+              className="w-full px-4 py-3 bg-slate-950/60 border border-white/10 rounded-xl text-slate-200 focus:outline-none focus:border-cyan-405 focus:ring-1 focus:ring-cyan-400 transition-all text-sm md:text-base"
             />
           </div>
 
           <div>
-            <label className="block text-gray-700 font-semibold mb-2">
+            <label className="block text-slate-300 font-semibold mb-2 text-sm md:text-base">
               👤 Contact Name (Optional)
             </label>
             <input
@@ -217,14 +217,14 @@ const ContactManager = ({ onContactsUpdate }) => {
               value={contactName}
               onChange={(e) => setContactName(e.target.value)}
               placeholder="e.g., Mom, Dad, Sister, Friend"
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+              className="w-full px-4 py-3 bg-slate-950/60 border border-white/10 rounded-xl text-slate-200 focus:outline-none focus:border-cyan-405 focus:ring-1 focus:ring-cyan-400 transition-all text-sm md:text-base"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-all transform hover:scale-105 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed text-lg"
+            className="w-full bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-white font-extrabold py-3.5 rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-base md:text-lg shadow-lg shadow-cyan-500/10"
           >
             {loading ? '⏳ Adding...' : '✅ Add Contact'}
           </button>
@@ -232,62 +232,62 @@ const ContactManager = ({ onContactsUpdate }) => {
       </div>
 
       {/* Contacts List */}
-      <div className="bg-white rounded-lg shadow-lg p-8 border-l-4 border-green-600">
-        <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-          <span className="text-3xl">👥</span>
+      <div className="bg-slate-900/60 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl p-8 hover:border-cyan-500/20 transition-all duration-300">
+        <h2 className="text-2xl md:text-3xl font-extrabold text-slate-100 mb-6 flex items-center gap-2">
+          <span className="text-2xl md:text-3xl">👥</span>
           Emergency Contacts ({contacts.length})
         </h2>
 
         {contacts.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">
+            <p className="text-slate-400 text-base md:text-lg font-medium">
               📭 No contacts added yet. Add your emergency contacts above.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {contacts.map((contact) => (
               <div
                 key={contact.id}
-                className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg border-2 border-green-300 hover:shadow-lg transition-all flex flex-col justify-between"
+                className="bg-slate-950/40 p-6 rounded-xl border border-white/5 hover:border-cyan-500/25 transition-all duration-300 flex flex-col justify-between hover:shadow-lg hover:shadow-cyan-950/20"
               >
                 <div>
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <p className="text-xl font-bold text-gray-800">
+                  <div className="flex justify-between items-start gap-4 mb-4">
+                    <div className="space-y-1">
+                      <p className="text-lg md:text-xl font-bold text-slate-100">
                         👤 {contact.contact_name}
                       </p>
-                      <p className="text-lg text-gray-600 font-semibold">
+                      <p className="text-base md:text-lg text-cyan-400 font-semibold font-mono">
                         📞 {contact.phone_number}
                       </p>
-                      <p className="text-xs text-blue-600 font-bold mt-1 bg-blue-100 px-2 py-0.5 rounded-full inline-block">
+                      <p className="text-[10px] md:text-xs text-indigo-300 font-bold mt-2 bg-indigo-950/60 border border-indigo-500/30 px-3 py-1 rounded-full inline-block">
                         📱 Subscribed Devices: {contact.device_count || 0}
                       </p>
                     </div>
                     <button
                       onClick={() => handleDeleteContact(contact.id)}
-                      className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-all transform hover:scale-105 active:scale-95"
+                      className="text-xs md:text-sm text-rose-400 hover:text-white border border-rose-500/35 hover:bg-rose-600 font-bold py-2 px-3 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95"
                     >
                       🗑️ Delete
                     </button>
                   </div>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-[10px] md:text-xs text-slate-500 font-medium">
                     Added: {new Date(contact.created_at).toLocaleDateString()}
                   </p>
                 </div>
                 
                 {/* Push Notifications Subscription Actions */}
                 {pushSupported && (
-                  <div className="mt-4 pt-4 border-t border-green-200">
+                  <div className="mt-4 pt-4 border-t border-white/5">
                     {subscribedContactId === contact.id ? (
                       <div className="flex flex-col gap-2">
-                        <div className="bg-purple-100 text-purple-800 text-sm font-bold p-2.5 rounded-lg border border-purple-300 flex items-center justify-between">
+                        <div className="bg-indigo-950/40 text-indigo-300 text-xs md:text-sm font-bold p-2.5 rounded-xl border border-indigo-500/30 flex items-center justify-between">
                           <span>🔔 Device is Subscribed</span>
-                          <span className="animate-pulse">●</span>
+                          <span className="animate-pulse text-indigo-400">●</span>
                         </div>
                         <button
                           onClick={handleUnsubscribe}
-                          className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 rounded-lg text-sm transition-all active:scale-95"
+                          className="w-full bg-gradient-to-r from-rose-600/30 to-red-600/30 hover:from-rose-600/50 hover:to-red-600/50 border border-rose-500/35 text-rose-200 font-bold py-2 px-3 rounded-lg text-xs md:text-sm transition-all active:scale-95"
                         >
                           🔕 Unsubscribe This Device
                         </button>
@@ -296,7 +296,7 @@ const ContactManager = ({ onContactsUpdate }) => {
                       <button
                         onClick={() => handleSubscribe(contact.id)}
                         disabled={loading}
-                        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg text-sm transition-all active:scale-95 disabled:bg-gray-400"
+                        className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold py-2 px-3 rounded-lg text-xs md:text-sm transition-all active:scale-95 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 shadow-md shadow-indigo-600/25"
                       >
                         🔔 Receive Alerts on this Device
                       </button>

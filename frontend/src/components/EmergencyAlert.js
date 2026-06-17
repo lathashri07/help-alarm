@@ -1,231 +1,105 @@
-import React, { useState, useEffect } from 'react';
-import { sendEmergencyAlert } from '../services/api';
+import React from 'react';
 
-const EmergencyAlert = ({ contacts }) => {
-  const [location, setLocation] = useState(null);
-  const [alertSending, setAlertSending] = useState(false);
-  const [message, setMessage] = useState('');
-  const [locationMessage, setLocationMessage] = useState('');
-  const [lastAlert, setLastAlert] = useState(null);
-  const [autoTriggered, setAutoTriggered] = useState(false);
-
-  // Auto-get location on component mount
-  useEffect(() => {
-    getLocationAuto();
-  }, []);
-
-  useEffect(() => {
-    // Listen for emergency alert trigger from voice recognition
-    const handleTriggerAlert = async () => {
-      await sendAlertAuto();
-    };
-
-    window.addEventListener('triggerEmergencyAlert', handleTriggerAlert);
-
-    return () => {
-      window.removeEventListener('triggerEmergencyAlert', handleTriggerAlert);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location, contacts]);
-
-  // Auto-get location (called on mount)
-  const getLocationAuto = () => {
-    if (!navigator.geolocation) {
-      setLocationMessage('❌ Geolocation not supported by your browser');
-      return;
-    }
-
-    setLocationMessage('📍 Detecting your location automatically...');
-    
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setLocation({ latitude, longitude });
-        setLocationMessage(
-          `✅ Location detected! Lat: ${latitude.toFixed(4)}, Lng: ${longitude.toFixed(4)}`
-        );
-      },
-      (error) => {
-        setLocationMessage(`⚠️ Location detection: ${error.message}`);
-        console.error('Geolocation error:', error);
-      }
-    );
-  };
-
-  // Auto-send emergency alert (called when "HELP" is detected)
-  const sendAlertAuto = async () => {
-    // Update location first
-    return new Promise((resolve) => {
-      if (!navigator.geolocation) {
-        console.log('Geolocation not available');
-        resolve();
-        return;
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-          setLocation({ latitude, longitude });
-
-          if (contacts.length === 0) {
-            console.log('No emergency contacts to notify');
-            resolve();
-            return;
-          }
-
-          setAlertSending(true);
-          setAutoTriggered(true);
-          setMessage('🚨 AUTO-TRIGGERED! Location captured & alert sending...');
-
-          try {
-            const response = await sendEmergencyAlert(
-              latitude,
-              longitude,
-              `🆘 EMERGENCY DETECTED! Your loved one is in DANGER! Location: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`
-            );
-
-            setLastAlert({
-              location: { latitude, longitude },
-              contacts: response.contactsNotified,
-              timestamp: new Date(),
-              smsResults: response.smsResults,
-              pushResults: response.pushResults
-            });
-
-            setMessage(
-              `✅ EMERGENCY ALERT SENT!\n` +
-              `📞 Notified: ${response.contactsNotified} contact(s)\n` +
-              `📍 Location: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}\n` +
-              `🗺️ Maps: ${response.mapsLink}`
-            );
-
-            console.log('Emergency alert response:', response);
-
-            setTimeout(() => {
-              setMessage('');
-              setAutoTriggered(false);
-            }, 8000);
-          } catch (error) {
-            setMessage('❌ Failed to send emergency alert');
-            console.error('Error sending alert:', error);
-            setAutoTriggered(false);
-          } finally {
-            setAlertSending(false);
-            resolve();
-          }
-        },
-        (error) => {
-          console.error('Failed to get location for alert:', error);
-          resolve();
-        }
-      );
-    });
-  };
-
+export const LocationTracker = ({ location, locationMessage, alertSending, onTriggerAlert }) => {
   return (
-    <div className="space-y-6">
-      {/* Auto-triggered Status */}
-      {autoTriggered && (
-        <div className="bg-gradient-to-r from-red-500 to-orange-500 rounded-lg shadow-xl p-8 border-4 border-red-700 animate-pulse">
-          <div className="text-center text-white">
-            <p className="text-4xl font-black mb-2">🚨 EMERGENCY PROTOCOL ACTIVATED!</p>
-            <p className="text-xl font-bold animate-bounce">Sending alert to all contacts...</p>
-          </div>
+    <div className="bg-slate-900/60 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl p-8 hover:border-cyan-500/20 transition-all duration-300">
+      <h2 className="text-2xl md:text-3xl font-extrabold text-slate-100 mb-6 flex items-center gap-2">
+        <span className="text-3xl">📍</span>
+        Location Tracking
+      </h2>
+
+      <div className="mb-6">
+        <button
+          id="test-trigger"
+          disabled={alertSending}
+          onClick={onTriggerAlert}
+          className="w-full bg-gradient-to-r from-rose-600 to-orange-600 hover:from-rose-500 hover:to-orange-500 text-white font-extrabold py-4 px-6 rounded-xl shadow-lg shadow-rose-600/30 hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 flex items-center justify-center gap-2 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-base md:text-lg"
+        >
+          {alertSending ? '🚨 Sending Emergency Alert...' : '🚨 Trigger Emergency Alert (Test Hook)'}
+        </button>
+      </div>
+
+      {locationMessage && (
+        <div className={`mb-6 p-4 rounded-xl font-semibold text-sm md:text-base border ${
+          locationMessage.includes('✅')
+            ? 'bg-emerald-950/40 text-emerald-300 border-emerald-500/35'
+            : locationMessage.includes('⚠️')
+            ? 'bg-amber-950/40 text-amber-300 border-amber-500/35'
+            : 'bg-cyan-950/40 text-cyan-300 border-cyan-500/35'
+        }`}>
+          {locationMessage}
         </div>
       )}
 
-      {/* Location Status */}
-      <div className="bg-white rounded-lg shadow-lg p-8 border-l-4 border-purple-600">
-        <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-          <span className="text-3xl">📍</span>
-          Location Tracking (Auto)
-        </h2>
-
-        <div className="mb-6">
-          <button
-            id="test-trigger"
-            disabled={alertSending}
-            onClick={() => window.dispatchEvent(new Event('triggerEmergencyAlert'))}
-            className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg shadow transition-all transform hover:scale-102 active:scale-98 text-md flex items-center justify-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            {alertSending ? '🚨 Sending Emergency Alert...' : '🚨 Trigger Emergency Alert (Test Hook)'}
-          </button>
+      {location && (
+        <div className="mb-6 p-5 bg-slate-950/40 border border-white/5 rounded-xl">
+          <p className="text-emerald-400 font-bold text-base md:text-lg mb-2 flex items-center gap-1.5">
+            <span>📌</span> Current Location (Real-time):
+          </p>
+          <p className="text-slate-300 text-sm md:text-base font-medium mb-1">
+            <strong className="text-slate-400">Latitude:</strong> {location.latitude.toFixed(6)}
+          </p>
+          <p className="text-slate-300 text-sm md:text-base font-medium mb-3">
+            <strong className="text-slate-400">Longitude:</strong> {location.longitude.toFixed(6)}
+          </p>
+          <p className="text-sm font-bold">
+            <a
+              href={`https://maps.google.com/?q=${location.latitude},${location.longitude}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-cyan-400 hover:text-cyan-300 hover:underline transition-all duration-300"
+            >
+              🗺️ View on Google Maps &rarr;
+            </a>
+          </p>
         </div>
+      )}
 
-        {locationMessage && (
-          <div className={`mb-6 p-4 rounded-lg font-semibold text-lg ${
-            locationMessage.includes('✅')
-              ? 'bg-green-100 text-green-800 border-2 border-green-500'
-              : locationMessage.includes('⚠️')
-              ? 'bg-yellow-100 text-yellow-800 border-2 border-yellow-500'
-              : 'bg-blue-100 text-blue-800 border-2 border-blue-300'
-          }`}>
-            {locationMessage}
-          </div>
-        )}
+      <p className="text-center text-slate-400 font-medium text-xs md:text-sm p-4 bg-slate-950/40 rounded-xl border border-white/5">
+        ✨ Location is automatically detected when app loads and updated when emergency is triggered
+      </p>
+    </div>
+  );
+};
 
-        {location && (
-          <div className="mb-6 p-4 bg-green-50 border-2 border-green-300 rounded-lg">
-            <p className="text-green-800 font-semibold text-lg mb-2">📌 Current Location (Real-time):</p>
-            <p className="text-green-700 text-lg">
-              <strong>Latitude:</strong> {location.latitude.toFixed(6)}
-            </p>
-            <p className="text-green-700 text-lg">
-              <strong>Longitude:</strong> {location.longitude.toFixed(6)}
-            </p>
-            <p className="text-sm text-green-600 mt-3">
-              <a
-                href={`https://maps.google.com/?q=${location.latitude},${location.longitude}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:text-green-800 font-bold"
-              >
-                🗺️ View on Google Maps →
-              </a>
-            </p>
-          </div>
-        )}
-
-        <p className="text-center text-gray-600 font-semibold text-sm p-3 bg-blue-50 rounded-lg border border-blue-300">
-          ✨ Location is automatically detected when app loads and updated when emergency is triggered
-        </p>
-      </div>
-
+export const AlertStatus = ({ contacts, lastAlert, message }) => {
+  return (
+    <div className="space-y-6">
       {/* Alert Message Display */}
       {message && (
-        <div className={`rounded-lg shadow-lg p-8 border-4 font-semibold text-lg whitespace-pre-line ${
+        <div className={`rounded-xl shadow-lg p-6 md:p-8 border font-semibold text-sm md:text-base whitespace-pre-line leading-relaxed ${
           message.includes('✅')
-            ? 'bg-green-100 text-green-800 border-green-500 animate-pulse'
+            ? 'bg-emerald-950/40 text-emerald-300 border-emerald-500/35 animate-pulse'
             : message.includes('🚨')
-            ? 'bg-red-100 text-red-800 border-red-500 animate-pulse'
-            : 'bg-yellow-100 text-yellow-800 border-yellow-500'
+            ? 'bg-rose-950/40 text-rose-300 border-rose-500/35 animate-pulse'
+            : 'bg-amber-950/40 text-amber-300 border-amber-500/35'
         }`}>
           {message}
         </div>
       )}
 
       {/* Emergency Alert Info */}
-      <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-lg shadow-lg p-8 border-4 border-red-600">
-        <h2 className="text-3xl font-bold text-red-700 mb-6 flex items-center gap-2">
-          <span className="text-4xl">🆘</span>
-          Emergency Alert Status (Auto)
+      <div className="bg-slate-900/60 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl p-8 hover:border-rose-500/20 transition-all duration-300">
+        <h2 className="text-2xl md:text-3xl font-extrabold text-slate-100 mb-6 flex items-center gap-2">
+          <span className="text-3xl md:text-4xl text-rose-500">🆘</span>
+          Emergency Alert Status
         </h2>
 
-        <div className="mb-6 p-6 bg-white rounded-lg border-2 border-red-300">
-          <p className="text-gray-800 mb-3">
-            <span className="font-bold text-lg">📞 Emergency Contacts:</span>
+        <div className="mb-6 p-6 bg-slate-950/40 rounded-xl border border-white/5">
+          <p className="text-slate-200 mb-3">
+            <span className="font-bold text-base md:text-lg">📞 Emergency Contacts:</span>
           </p>
           {contacts.length > 0 ? (
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {contacts.map((contact, index) => (
-                <p key={contact.id} className="text-gray-700 flex items-center gap-2">
-                  <span className="text-green-600">✓</span>
-                  <span>{index + 1}. {contact.contact_name} - {contact.phone_number}</span>
+                <p key={contact.id} className="text-slate-300 flex items-center gap-2 text-sm md:text-base font-medium">
+                  <span className="text-emerald-400 font-bold">✓</span>
+                  <span>{index + 1}. {contact.contact_name} &bull; <span className="font-mono text-cyan-400">{contact.phone_number}</span></span>
                 </p>
               ))}
             </div>
           ) : (
-            <p className="text-red-600 font-semibold">
+            <p className="text-rose-400 font-semibold text-sm md:text-base">
               ⚠️ No emergency contacts added. Please add contacts first!
             </p>
           )}
@@ -233,55 +107,57 @@ const EmergencyAlert = ({ contacts }) => {
 
         {/* Alert Details if sent */}
         {lastAlert && (
-          <div className="mb-6 p-6 bg-green-50 border-2 border-green-500 rounded-lg">
-            <p className="font-bold text-green-800 text-lg mb-2">✅ Last Emergency Alert Sent:</p>
-            <p className="text-green-700">📞 Contacts Notified: {lastAlert.contacts}</p>
-            <p className="text-green-700">⏰ Time: {lastAlert.timestamp.toLocaleTimeString()}</p>
-            <p className="text-green-700">📍 Location: {lastAlert.location.latitude.toFixed(4)}, {lastAlert.location.longitude.toFixed(4)}</p>
+          <div className="mb-6 p-6 bg-emerald-950/20 border border-emerald-500/30 rounded-xl shadow-inner">
+            <p className="font-bold text-emerald-400 text-base md:text-lg mb-3">✅ Last Emergency Alert Sent:</p>
+            <div className="space-y-1 text-sm md:text-base text-slate-300 font-medium mb-4">
+              <p><span className="text-slate-400">Contacts Notified:</span> <span className="text-slate-100 font-bold">{lastAlert.contacts}</span></p>
+              <p><span className="text-slate-400">Time:</span> {lastAlert.timestamp.toLocaleTimeString()}</p>
+              <p><span className="text-slate-400">Location:</span> {lastAlert.location.latitude.toFixed(4)}, {lastAlert.location.longitude.toFixed(4)}</p>
+            </div>
             
             {lastAlert.smsResults && lastAlert.smsResults.length > 0 && (
-              <div className="mt-4 p-3 bg-white rounded border border-green-300">
-                <p className="font-bold text-green-800 mb-2">📱 SMS Status:</p>
-                {lastAlert.smsResults.map((result, idx) => (
-                  <p key={idx} className={`text-sm ${result.status === 'sent' || result.status.includes('demo') ? 'text-green-700' : 'text-red-700'}`}>
-                    {result.status === 'sent' || result.status.includes('demo') ? '✅' : '❌'} {result.contact} ({result.phone}): {result.status}
-                  </p>
-                ))}
+              <div className="mt-4 p-4 bg-slate-900/60 rounded-xl border border-white/5">
+                <p className="font-bold text-emerald-400 mb-2.5 text-sm md:text-base">📱 SMS Status:</p>
+                <div className="space-y-1.5">
+                  {lastAlert.smsResults.map((result, idx) => (
+                    <p key={idx} className={`text-xs md:text-sm font-medium ${result.status === 'sent' || result.status.includes('demo') ? 'text-emerald-300' : 'text-rose-300'}`}>
+                      {result.status === 'sent' || result.status.includes('demo') ? '✅' : '❌'} {result.contact} (<span className="font-mono">{result.phone}</span>): {result.status}
+                    </p>
+                  ))}
+                </div>
               </div>
             )}
 
             {lastAlert.pushResults && lastAlert.pushResults.length > 0 && (
-              <div className="mt-4 p-3 bg-white rounded border border-purple-300">
-                <p className="font-bold text-purple-800 mb-2">🔔 Push Notification Status:</p>
-                {lastAlert.pushResults.map((result, idx) => (
-                  <p key={idx} className={`text-sm ${result.status === 'delivered' ? 'text-purple-700' : 'text-red-700'}`}>
-                    {result.status === 'delivered' ? '✅' : '❌'} {result.contact} ({result.phone}): {result.status}
-                  </p>
-                ))}
+              <div className="mt-4 p-4 bg-slate-900/60 rounded-xl border border-white/5">
+                <p className="font-bold text-indigo-400 mb-2.5 text-sm md:text-base">🔔 Push Notification Status:</p>
+                <div className="space-y-1.5">
+                  {lastAlert.pushResults.map((result, idx) => (
+                    <p key={idx} className={`text-xs md:text-sm font-medium ${result.status === 'delivered' ? 'text-indigo-300' : 'text-rose-300'}`}>
+                      {result.status === 'delivered' ? '✅' : '❌'} {result.contact} (<span className="font-mono">{result.phone}</span>): {result.status}
+                    </p>
+                  ))}
+                </div>
               </div>
             )}
           </div>
         )}
 
-        <div className="p-4 bg-yellow-100 border-2 border-yellow-500 rounded-lg">
-          <p className="text-yellow-800 font-bold text-lg mb-2">✨ How Auto-Alert Works:</p>
-          <ul className="text-yellow-800 space-y-1 font-semibold">
-            <li>✓ 🎤 Just say "HELP" when in danger</li>
-            <li>✓ 📍 Location is automatically captured in real-time</li>
-            <li>✓ 🔊 Loud siren alarm sounds (2000-3000 Hz for 1 minute)</li>
-            <li>✓ 📱 SMS alerts sent to ALL stored emergency contacts</li>
-            <li>✓ 🗺️ Location link included in message</li>
-            <li>✓ 📋 Alert recorded in history</li>
-            <li>✓ 🔄 System auto-restarts after 5 seconds</li>
+        <div className="p-5 bg-slate-950/40 border border-white/5 rounded-xl">
+          <p className="text-slate-200 font-bold text-sm md:text-base mb-3 flex items-center gap-1.5">
+            <span className="text-cyan-400">🪶</span> Emergency Protocol:
+          </p>
+          <ul className="text-xs md:text-sm text-slate-400 space-y-2.5 font-medium list-disc list-inside">
+            <li><strong className="text-slate-300">Voice Trigger</strong> &mdash; Monitoring activates automatically when the keyword <strong className="text-rose-400">"HELP"</strong> is detected.</li>
+            <li><strong className="text-slate-300">Geo-Location</strong> &mdash; Gathers real-time GPS coordinates and builds maps redirects.</li>
+            <li><strong className="text-slate-300">Instant Alerting</strong> &mdash; Distributes siren sweeps and notifies emergency contacts via SMS.</li>
           </ul>
         </div>
 
-        <p className="text-sm text-red-600 mt-4 font-semibold text-center p-3 bg-red-50 border border-red-300 rounded">
-          ⚡ Everything works automatically - no buttons to click! Just say "HELP" and the entire emergency protocol activates!
+        <p className="text-xs md:text-sm text-rose-300 mt-4 font-semibold text-center p-4 bg-rose-950/20 border border-rose-500/20 rounded-xl">
+          ⚡ Automatic Activation &mdash; Speak "HELP" to trigger all emergency systems instantly.
         </p>
       </div>
     </div>
   );
 };
-
-export default EmergencyAlert;

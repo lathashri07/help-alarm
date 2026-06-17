@@ -183,17 +183,17 @@ const Alarm = forwardRef((props, ref) => {
   React.useImperativeHandle(ref, () => ({ playAlarm, stopAlarm }));
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-8 border-l-4 border-yellow-500">
+    <div className="bg-slate-900/60 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl p-8 hover:border-cyan-500/20 transition-all duration-300">
       <div className="text-center">
-        <h3 className="text-2xl font-bold text-gray-800 mb-3 flex items-center justify-center gap-2">
-          <span className="text-3xl">🔔</span> Alarm System
+        <h3 className="text-xl md:text-2xl font-extrabold text-slate-100 mb-3 flex items-center justify-center gap-2">
+          <span className="text-2xl md:text-3xl">🔔</span> Alarm System
         </h3>
 
         {/* Audio unlock badge */}
-        <div className={`mb-4 px-4 py-2 rounded-full text-sm font-semibold inline-block ${
+        <div className={`mb-5 px-5 py-2 rounded-full text-xs md:text-sm font-bold inline-block border ${
           audioUnlocked
-            ? 'bg-green-100 text-green-700 border border-green-400'
-            : 'bg-orange-100 text-orange-700 border border-orange-400 animate-pulse'
+            ? 'bg-emerald-950/40 text-emerald-300 border-emerald-500/35'
+            : 'bg-amber-950/40 text-amber-300 border-amber-500/35 animate-pulse'
         }`}>
           {audioUnlocked
             ? '🔓 Audio ready — voice trigger will work'
@@ -201,9 +201,9 @@ const Alarm = forwardRef((props, ref) => {
         </div>
 
         {isAlarmPlaying && (
-          <div className="my-4 p-4 bg-red-100 border-2 border-red-500 rounded-lg animate-pulse">
-            <p className="text-red-700 font-bold text-lg">🔊 ALARM RINGING!</p>
-            <p className="text-red-600 text-sm">2000–3000 Hz siren active</p>
+          <div className="my-5 p-5 bg-rose-950/40 border border-rose-500/30 rounded-xl animate-pulse">
+            <p className="text-rose-400 font-bold text-base md:text-lg">🔊 ALARM RINGING!</p>
+            <p className="text-rose-300/80 text-xs md:text-sm font-medium mt-1">2000–3000 Hz siren active</p>
           </div>
         )}
 
@@ -211,18 +211,14 @@ const Alarm = forwardRef((props, ref) => {
           <button
             onClick={playAlarm}
             disabled={isAlarmPlaying}
-            className={`px-6 py-3 rounded-lg font-bold text-white transition-all ${
-              isAlarmPlaying ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700 active:scale-95'
-            }`}
+            className="px-6 py-3 rounded-xl font-bold text-white transition-all duration-300 hover:scale-105 active:scale-95 text-sm md:text-base bg-gradient-to-r from-rose-600 to-orange-600 hover:from-rose-500 hover:to-orange-500 shadow-md shadow-rose-600/20 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 disabled:shadow-none disabled:cursor-not-allowed"
           >
             🔊 Test Alarm
           </button>
           <button
             onClick={stopAlarm}
             disabled={!isAlarmPlaying}
-            className={`px-6 py-3 rounded-lg font-bold text-white transition-all ${
-              !isAlarmPlaying ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 active:scale-95'
-            }`}
+            className="px-6 py-3 rounded-xl font-bold text-white transition-all duration-300 hover:scale-105 active:scale-95 text-sm md:text-base bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 shadow-md shadow-cyan-900/20 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 disabled:shadow-none disabled:cursor-not-allowed"
           >
             ⏹️ Stop
           </button>

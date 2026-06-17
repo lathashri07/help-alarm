@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Alarm from './Alarm';
 
-const VoiceRecognition = () => {
+const VoiceRecognition = ({ alarmRef, onTriggerAlert }) => {
   const [phase, setPhase]           = useState('idle');     // idle | listening | triggered
   const [confidence, setConfidence] = useState(0);
   const [lastHeard, setLastHeard]   = useState('');
   const [feedback, setFeedback]     = useState('👆 Click anywhere on the page to activate');
   const [micError, setMicError]     = useState('');
-
-  const alarmRef        = useRef(null);
   const activeRecRef    = useRef(null);
   const restartTimer    = useRef(null);
   const isStoppedRef    = useRef(true);   // true = don't restart
@@ -95,8 +92,10 @@ const VoiceRecognition = () => {
               .then(() => log('✅ playAlarm() resolved'))
               .catch(e  => log(`❌ playAlarm() error: ${e?.message}`));
           }
-          window.dispatchEvent(new CustomEvent('triggerEmergencyAlert'));
-          log('📡 triggerEmergencyAlert dispatched');
+          if (onTriggerAlert) {
+            onTriggerAlert();
+          }
+          log('📡 onTriggerAlert callback fired');
           return;
         }
       }
@@ -127,6 +126,7 @@ const VoiceRecognition = () => {
     } catch (e) {
       log(`❌ rec.start() threw: ${e.message}`);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [log]);
 
   // ── Bootstrap on first user interaction ───────────────────────────────────
@@ -175,10 +175,10 @@ const VoiceRecognition = () => {
 
   // ── UI ────────────────────────────────────────────────────────────────────
   const pillColor = {
-    idle:      'bg-gray-400',
-    listening: 'bg-green-500 animate-pulse shadow-lg shadow-green-300',
-    triggered: 'bg-red-600 animate-pulse shadow-lg shadow-red-300',
-  }[phase] || 'bg-gray-400';
+    idle:      'bg-slate-800/80 text-slate-400 border border-slate-700/60',
+    listening: 'bg-gradient-to-r from-cyan-500 to-teal-500 text-white animate-pulse shadow-lg shadow-cyan-500/25',
+    triggered: 'bg-gradient-to-r from-rose-600 to-red-600 text-white animate-pulse shadow-lg shadow-rose-600/40 border border-rose-500/30',
+  }[phase] || 'bg-slate-800/80 text-slate-400';
 
   const pillLabel = {
     idle:      '⏸ WAITING',
@@ -187,67 +187,68 @@ const VoiceRecognition = () => {
   }[phase];
 
   const bannerCls = phase === 'triggered'
-    ? 'bg-red-100 text-red-800 border-4 border-red-600 animate-pulse'
+    ? 'bg-rose-950/40 text-rose-200 border border-rose-500/30 animate-pulse'
     : phase === 'listening'
-      ? 'bg-green-50 text-green-800 border-2 border-green-400'
-      : 'bg-blue-50 text-blue-800 border-2 border-blue-300';
+      ? 'bg-cyan-950/40 text-cyan-200 border border-cyan-500/35 shadow-inner'
+      : 'bg-slate-900/50 text-slate-300 border border-white/5';
 
   const pct = Math.round(confidence * 100);
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow-lg p-8 border-l-4 border-red-600">
+      <div className="bg-slate-900/60 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl p-8 hover:border-cyan-500/20 transition-all duration-300">
         <div className="text-center">
 
-          <h2 className="text-3xl font-bold text-gray-800 mb-2 flex items-center justify-center gap-2">
-            <span className="text-4xl">🎤</span> Voice Detection
+          <h2 className="text-2xl md:text-3xl font-extrabold text-slate-100 mb-2 flex items-center justify-center gap-2">
+            <span className="text-3xl md:text-4xl">🎤</span> Voice Detection
           </h2>
-          <p className="text-gray-500 mb-6 text-sm">
-            Automatic • No buttons needed • Say <strong>"HELP"</strong> at any time
+          <p className="text-slate-400 mb-6 text-xs md:text-sm font-medium">
+            Automatic &bull; No buttons needed &bull; Say <strong className="text-cyan-400">"HELP"</strong> at any time
           </p>
 
           {/* Status pill */}
-          <div className="mb-5">
-            <div className={`inline-block px-8 py-3 rounded-full text-white font-bold text-lg transition-all ${pillColor}`}>
+          <div className="mb-6">
+            <div className={`inline-block px-8 py-3 rounded-full font-bold text-base md:text-lg transition-all duration-300 ${pillColor}`}>
               {pillLabel}
             </div>
           </div>
 
           {/* Feedback */}
-          <div className={`mb-5 p-5 rounded-lg font-semibold text-base ${bannerCls}`}>
+          <div className={`mb-6 p-5 rounded-xl font-semibold text-sm md:text-base transition-all duration-300 ${bannerCls}`}>
             {feedback}
           </div>
 
           {/* Mic error */}
           {micError && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-300 rounded-lg text-left">
-              <p className="text-red-700 text-sm font-bold">❌ {micError}</p>
+            <div className="mb-4 p-4 bg-rose-950/40 border border-rose-500/30 rounded-xl text-left">
+              <p className="text-rose-300 text-sm font-bold">❌ {micError}</p>
             </div>
           )}
 
           {/* Live word + confidence bar */}
           {phase === 'listening' && (
-            <div className="mb-5 px-4">
+            <div className="mb-6 px-2">
               {lastHeard && (
-                <p className="text-sm text-gray-500 mb-2">
-                  Heard: <span className={`font-bold text-base ${lastHeard.includes('HELP') ? 'text-red-600' : 'text-gray-700'}`}>
+                <p className="text-sm text-slate-400 mb-3 font-medium">
+                  Heard:{' '}
+                  <span className={`font-bold text-base px-2.5 py-1 rounded bg-slate-950/60 border border-white/5 ${lastHeard.includes('HELP') ? 'text-rose-400' : 'text-cyan-300'}`}>
                     "{lastHeard}"
                   </span>
                 </p>
               )}
-              <div className="flex justify-between text-xs text-gray-400 mb-1">
-                <span>HELP confidence</span>
-                <span className={pct >= 85 ? 'text-red-600 font-bold' : ''}>{pct}%</span>
+              <div className="flex justify-between text-xs text-slate-400 mb-1.5">
+                <span className="font-semibold">HELP confidence</span>
+                <span className={pct >= 85 ? 'text-rose-400 font-bold' : 'text-cyan-400 font-semibold'}>{pct}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+              <div className="w-full bg-slate-950 rounded-full h-3 overflow-hidden p-[1px] border border-white/5">
                 <div
-                  className={`h-3 rounded-full transition-all duration-150 ${
-                    pct >= 85 ? 'bg-red-500' : pct >= 50 ? 'bg-yellow-400' : 'bg-green-400'
+                  className={`h-full rounded-full transition-all duration-150 ${
+                    pct >= 85 ? 'bg-gradient-to-r from-rose-500 to-red-500 shadow-md shadow-rose-500/40' : pct >= 50 ? 'bg-gradient-to-r from-amber-400 to-yellow-400' : 'bg-gradient-to-r from-cyan-400 to-teal-400'
                   }`}
                   style={{ width: `${pct}%` }}
                 />
               </div>
-              <p className="text-xs text-gray-400 mt-1">Alarm fires at ≥ 85%</p>
+              <p className="text-[10px] md:text-xs text-slate-500 mt-1.5 font-medium">Alarm fires at &ge; 85%</p>
             </div>
           )}
 
@@ -256,7 +257,7 @@ const VoiceRecognition = () => {
             <div className="mb-6">
               <button
                 onClick={handleReset}
-                className="px-8 py-3 rounded-lg font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-95"
+                className="px-8 py-3.5 rounded-xl font-bold text-white bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 shadow-lg shadow-cyan-500/20 active:scale-95 transition-all duration-300 hover:scale-[1.02]"
               >
                 🔄 Reset & Listen Again
               </button>
@@ -264,21 +265,19 @@ const VoiceRecognition = () => {
           )}
 
           {/* Instructions */}
-          <div className="p-4 bg-yellow-50 rounded-lg border-2 border-yellow-300 text-left">
-            <p className="text-sm font-bold text-gray-700 mb-2">✨ How to use:</p>
-            <ol className="text-sm text-gray-600 space-y-1 list-decimal list-inside">
-              <li><strong>Click anywhere</strong> on the page once to unlock microphone</li>
-              <li>Allow microphone access when the browser asks</li>
-              <li>Say <strong>"HELP"</strong> clearly and loudly</li>
-              <li>Alarm fires automatically — no button needed</li>
-              <li>Click <strong>Reset</strong> to listen again after an alert</li>
-            </ol>
+          <div className="p-5 bg-slate-950/40 rounded-xl border border-white/5 text-left">
+            <p className="text-sm font-bold text-slate-200 mb-3 flex items-center gap-1.5">
+              <span className="text-cyan-400">🪶</span> Setup & Usage:
+            </p>
+            <ul className="text-xs md:text-sm text-slate-400 space-y-2 list-disc list-inside font-medium">
+              <li><strong className="text-slate-300">Activate</strong>: Click anywhere on the page to enable microphone monitoring.</li>
+              <li><strong className="text-slate-300">Trigger</strong>: Say <strong className="text-rose-400">"HELP"</strong> clearly to activate the emergency protocol automatically.</li>
+              <li><strong className="text-slate-300">Reset</strong>: Use the <strong className="text-cyan-400">Reset</strong> button to resume monitoring after an alert has fired.</li>
+            </ul>
           </div>
 
         </div>
       </div>
-
-      <Alarm ref={alarmRef} />
     </div>
   );
 };

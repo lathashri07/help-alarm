@@ -66,6 +66,16 @@ export const getAlerts = async () => {
   }
 };
 
+export const clearAlertHistory = async () => {
+  try {
+    const response = await apiClient.delete('/alerts');
+    return response.data;
+  } catch (error) {
+    console.error('Error clearing alert history:', error);
+    throw error;
+  }
+};
+
 export const getVapidPublicKey = async () => {
   try {
     const response = await apiClient.get('/vapid-public-key');

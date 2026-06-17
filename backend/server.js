@@ -383,6 +383,16 @@ app.get('/api/alerts', (req, res) => {
   );
 });
 
+// Delete all emergency alert history
+app.delete('/api/alerts', (req, res) => {
+  db.run('DELETE FROM emergency_alerts', function (err) {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json({ message: 'All alert history deleted successfully', changes: this.changes });
+  });
+});
+
 // 6. Get VAPID public key
 app.get('/api/vapid-public-key', (req, res) => {
   if (!vapidKeys.publicKey) {

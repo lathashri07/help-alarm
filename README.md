@@ -9,8 +9,12 @@ A web-based emergency alert system designed to help women in danger situations. 
 - **📍 Browser Geolocation**: Captures user's current GPS location
 - **📱 Emergency Contacts**: Store and manage loved ones' phone numbers
 - **📤 Emergency Alerts**: Send location and emergency message to all contacts
-- **📋 Alert History**: View all emergency alerts sent with timestamps and locations
-- **🎨 Modern UI**: React + Tailwind CSS for responsive, user-friendly interface
+- **📋 Alert History**: View emergency alerts with locations and timestamps, with option to purge database logs
+- **🎨 Premium UI & Dashboard**:
+  - **Iridescent Color Theme**: Modern, secure dark gradient aesthetic (`slate-950` via `teal-950` to `indigo-950`) and translucent glassmorphism.
+  - **Integrated Header & Navigation**: Segmented navigation links aligned inside the brand header for standard web layout structure.
+  - **Symmetrical 2x2 Grid**: Top-row features voice controls alongside alarm diagnostics. Bottom-row features real-time location mapping alongside notification queues.
+  - **Peacock Feather SVG Branding**: Custom-drawn, animated logo displaying deep green/turquoise/gold gradients with glowing core pulses.
 
 ## 📋 Tech Stack
 
