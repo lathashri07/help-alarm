@@ -1,19 +1,10 @@
 node_modules
+npm-debug.log
+.env
+.env.local
+.DS_Store
 dist
 build
-coverage
-dev-dist
-.vite
-
-# secrets and local data: never commit
-.env
-.env.*
-!.env.example
 *.db
-*.sqlite
-*.sqlite3
-
-# misc
-.DS_Store
-npm-debug.log*
-*.log
+help_alarm.db
+.sqlite
