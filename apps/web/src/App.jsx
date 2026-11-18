@@ -1,15 +1,23 @@
+import { Route, Routes } from 'react-router-dom';
+import AppShell from './components/AppShell.jsx';
+import Placeholder from './pages/Placeholder.jsx';
+import { routes } from './routes.js';
+
+const page = (r) => <Placeholder id={r.id} title={r.title} />;
+const byArea = (area) => routes.filter((r) => r.area === area);
+
 export default function App() {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-4 p-6">
-      <h1 className="text-2xl font-bold">Help Alarm</h1>
-      <p className="text-ink-muted">Design tokens are working.</p>
-      <div className="rounded-card border border-line bg-card p-4">A card on the dark surface</div>
-      <button className="min-h-touch rounded-btn bg-primary px-6 font-semibold hover:bg-primary-hover">
-        Primary button
-      </button>
-      <button className="flex h-24 w-24 items-center justify-center rounded-full bg-danger text-lg font-extrabold">
-        SOS
-      </button>
-    </div>
+    <Routes>
+      <Route element={<AppShell />}>
+        {byArea('app').map((r) => (
+          <Route key={r.id} path={r.path} element={page(r)} />
+        ))}
+      </Route>
+      {[...byArea('auth'), ...byArea('alert'), ...byArea('public')].map((r) => (
+        <Route key={r.id} path={r.path} element={page(r)} />
+      ))}
+      <Route path="*" element={<Placeholder id="-" title="Page not found" />} />
+    </Routes>
   );
 }
