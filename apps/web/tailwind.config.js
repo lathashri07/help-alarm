@@ -1,6 +1,6 @@
 /** Design tokens from the Phase 4 component sheet. Change them here, nowhere else. */
 export default {
-content: ['./index.html', './apps/web/src/**/*.{js,jsx}'],
+content: ['./index.html', './src/**/*.{js,jsx}'],
   theme: {
     extend: {
       colors: {
