@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch src/main.js",
+    "dev:worker": "node --watch src/worker.js",
+    "start:worker": "node src/worker.js",
+    "dev:worker": "npm run dev:worker -w apps/api",
     "start": "node src/main.js"
   },
   "dependencies": {
