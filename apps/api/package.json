@@ -1,0 +1,28 @@
+{
+  "name": "@help-alarm/api",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/main.js",
+    "dev:worker": "npm run dev:worker -w apps/api",
+    "start:worker": "node src/worker.js",
+    "start": "node src/main.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "pg-boss": "^10.4.2",
+    "pino": "^9.6.0",
+    "pino-http": "^10.4.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "supertest": "^7.3.2",
+    "vitest": "^2.1.9"
+  }
+}
