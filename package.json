@@ -13,6 +13,9 @@
     "dev:api": "npm run dev -w apps/api",
     "build": "npm run build -w apps/web",
     "depcruise": "depcruise apps/api/src --config .dependency-cruiser.cjs",
+    "db:up": "docker compose up -d db",
+    "db:down": "docker compose down",
+    "db:psql": "docker compose exec db psql -U helpalarm -d helpalarm",
     "test": "npm run test --workspaces --if-present"
   },
   "devDependencies": {

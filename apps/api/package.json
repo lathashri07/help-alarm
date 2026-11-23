@@ -11,6 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
@@ -22,6 +23,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "prisma": "^6.19.3",
     "supertest": "^7.3.2",
     "vitest": "^2.1.9"
   }
